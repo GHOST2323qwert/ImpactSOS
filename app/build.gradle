@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace "com.sos.app"   // 👈 ADICIONA ISTO
+    namespace "com.sos.app"  
 
     compileSdk 34
 
@@ -11,8 +11,6 @@ android {
         applicationId "com.sos.app"
         minSdk 24
         targetSdk 34
-    }
-}
 
     buildTypes {
         debug {
