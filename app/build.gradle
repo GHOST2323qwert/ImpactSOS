@@ -3,24 +3,22 @@ plugins {
 }
 
 android {
-    android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.impactsos.app"
+        applicationId "com.example.impactsos"
         minSdk 24
         targetSdk 34
-    }
-
-    buildFeatures {
-        buildConfig = true
-    }
-}
+        versionCode 1
+        versionName "1.0"
     }
 
     buildTypes {
         debug {
             debuggable true
+        }
+        release {
+            minifyEnabled false
         }
     }
 }
