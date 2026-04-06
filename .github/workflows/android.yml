@@ -1,22 +1,9 @@
-- uses: actions/checkout@v4
-
-- name: Set up Java
-  uses: actions/setup-java@v4
-  with:
-    distribution: 'temurin'
-    java-version: '17'
-
-- name: Give permission
-  run: chmod +x gradlew
-
-- name: Build APK
-  run: ./gradlew assembleDebug
- 
-- name: Build APK
+name: Build APK
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
@@ -28,11 +15,41 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: temurin
+          java-version: 17
 
-      - name: Install Gradle
-        run: sudo apt-get install -y gradle
+      - name: Give permission
+        run: chmod +x gradlew
+
+      - name: Build APK
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: APK
+          path: app/build/outputs/apk/debug/*.apkname: Build APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Give permission
+        run: chmod +x gradlew
 
       - name: Build APK
         run: ./gradlew assembleDebug
