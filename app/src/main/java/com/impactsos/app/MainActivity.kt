@@ -15,8 +15,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
 
-    var LIMITE_G = 3.0
-    var ultimoDisparo = 0L
+    var impactThreshold = 3.0
+    var impactDetected = false
+    var impactTime = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val button = Button(this)
         button.text = "🚨 SOS"
         button.setOnClickListener {
-            Toast.makeText(this, "SOS ACTIVATED!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "🚨 SOS ATIVADO!", Toast.LENGTH_SHORT).show()
         }
 
         setContentView(button)
@@ -49,13 +50,21 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val z = event.values[2]
 
         val gForce = sqrt((x * x + y * y + z * z)) / SensorManager.GRAVITY_EARTH
+        val currentTime = System.currentTimeMillis()
 
-        if (gForce > LIMITE_G) {
-            val agora = System.currentTimeMillis()
+        // Detect strong impact
+        if (gForce > impactThreshold && !impactDetected) {
+            impactDetected = true
+            impactTime = currentTime
+        }
 
-            if (agora - ultimoDisparo > 5000) {
-                ultimoDisparo = agora
-                Toast.makeText(this, "SOS ACTIVATED!", Toast.LENGTH_SHORT).show()
+        // Check if user stayed still after impact
+        if (impactDetected) {
+            if (currentTime - impactTime > 3000) {
+                if (gForce < 1.5) {
+                    Toast.makeText(this, "🚨 POSSÍVEL ACIDENTE DETETADO!", Toast.LENGTH_LONG).show()
+                }
+                impactDetected = false
             }
         }
     }
