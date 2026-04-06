@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
 
-    var impactThreshold = 3.0
+    var impactThreshold = 1.0
     var impactDetected = false
     var impactTime = 0L
 
