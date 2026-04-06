@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         // Check if user stayed still after impact
         if (impactDetected) {
             if (currentTime - impactTime > 3000) {
-                if (gForce < 1.5) {
+                if (gForce < 1.2) {
                     Toast.makeText(this, "🚨 POSSÍVEL ACIDENTE DETETADO!", Toast.LENGTH_LONG).show()
                 }
                 impactDetected = false
