@@ -2,7 +2,7 @@
 
     <application
         android:label="ImpactSOS"
-        android:theme="@style/Theme.AppCompat.Light">
+        android:theme="@android:style/Theme.Material.Light"
 
        <activity
     android:name=".MainActivity"
