@@ -1,4 +1,18 @@
-name: Build APK
+- uses: actions/checkout@v4
+
+- name: Set up Java
+  uses: actions/setup-java@v4
+  with:
+    distribution: 'temurin'
+    java-version: '17'
+
+- name: Give permission
+  run: chmod +x gradlew
+
+- name: Build APK
+  run: ./gradlew assembleDebug
+ 
+- name: Build APK
 
 on:
   push:
