@@ -3,15 +3,16 @@ plugins {
 }
 
 android {
+    namespace "com.sos.app"   // 👈 ADICIONA ISTO
+
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.impactsos"
+        applicationId "com.sos.app"
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
     }
+}
 
     buildTypes {
         debug {
