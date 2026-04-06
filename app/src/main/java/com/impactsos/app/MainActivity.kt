@@ -1,4 +1,4 @@
-package com.impactsos.app
+package com.sosimpact
 
 import android.os.Bundle
 import android.widget.Button
