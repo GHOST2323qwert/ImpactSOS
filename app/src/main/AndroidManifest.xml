@@ -2,18 +2,18 @@
 
     <application
         android:label="ImpactSOS"
-        android:theme="@android:style/Theme.Material.Light"
+        android:theme="@style/Theme.AppCompat.Light">
 
-       <activity
-    android:name=".MainActivity"
-    android:exported="true">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
 
-    <intent-filter>
-        <action android:name="android.intent.action.MAIN" />
-        <category android:name="android.intent.category.LAUNCHER" />
-    </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
 
-</activity>
+        </activity>
 
     </application>
 
