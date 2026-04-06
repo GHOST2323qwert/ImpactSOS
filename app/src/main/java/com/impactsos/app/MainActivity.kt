@@ -1,22 +1,64 @@
 package com.sosimpact
 
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlin.math.sqrt
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), SensorEventListener {
+
+    lateinit var sensorManager: SensorManager
+    var accelerometer: Sensor? = null
+
+    var LIMITE_G = 3.0
+    var ultimoDisparo = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
         val button = Button(this)
         button.text = "🚨 SOS"
-
         button.setOnClickListener {
             Toast.makeText(this, "SOS ACTIVATED!", Toast.LENGTH_SHORT).show()
         }
 
         setContentView(button)
     }
+
+    override fun onResume() {
+        super.onResume()
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        val x = event.values[0]
+        val y = event.values[1]
+        val z = event.values[2]
+
+        val gForce = sqrt((x * x + y * y + z * z)) / SensorManager.GRAVITY_EARTH
+
+        if (gForce > LIMITE_G) {
+            val agora = System.currentTimeMillis()
+
+            if (agora - ultimoDisparo > 5000) {
+                ultimoDisparo = agora
+                Toast.makeText(this, "SOS ACTIVATED!", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
