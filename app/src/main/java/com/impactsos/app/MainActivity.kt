@@ -58,8 +58,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         navView.setNavigationItemSelectedListener {
             when (it.title) {
-                "Definições" -> startActivity(Intent(this, SettingsActivity::class.java))
-                "Sobre a App" -> startActivity(Intent(this, AboutActivity::class.java))
+               // "Definições" -> startActivity(Intent(this, SettingsActivity::class.java))
+                //"Sobre a App" -> startActivity(Intent(this, AboutActivity::class.java))
             }
             drawerLayout.closeDrawer(Gravity.RIGHT)
             true
