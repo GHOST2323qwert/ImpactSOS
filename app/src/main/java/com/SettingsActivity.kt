@@ -13,6 +13,16 @@ class SettingsActivity : AppCompatActivity() {
         layout.orientation = LinearLayout.VERTICAL
         layout.setPadding(50, 50, 50, 50)
 
+        // 🔙 Botão voltar
+val backButton = Button(this)
+backButton.text = "← Voltar"
+
+backButton.setOnClickListener {
+    finish() // fecha esta activity e volta atrás
+}
+
+layout.addView(backButton)
+
         // Sensibilidade
         val sensitivityText = TextView(this)
         sensitivityText.text = "Sensibilidade do Impacto"
