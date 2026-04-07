@@ -1,6 +1,5 @@
 package com.sosimpact
 
-import android.content.Intent
 import android.hardware.*
 import android.os.Bundle
 import android.view.Gravity
@@ -14,6 +13,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
+
     var impactThreshold = 1.0
     var impactDetected = false
     var impactTime = 0L
@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // sensores
+        // 🔧 sensores
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         button.setOnClickListener {
             isActive = !isActive
+
             if (isActive) {
                 button.text = "SOS ON"
                 button.setBackgroundColor(android.graphics.Color.GREEN)
@@ -69,6 +70,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         navView.setNavigationItemSelectedListener {
             drawerLayout.closeDrawer(Gravity.RIGHT)
             true
+        }
 
         val navParams = DrawerLayout.LayoutParams(
             DrawerLayout.LayoutParams.WRAP_CONTENT,
@@ -80,6 +82,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         drawerLayout.addView(navView, navParams)
 
         setContentView(drawerLayout)
+    }
 
     override fun onResume() {
         super.onResume()
@@ -118,7 +121,4 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
-    }
 
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-}
