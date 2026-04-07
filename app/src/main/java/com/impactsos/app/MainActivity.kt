@@ -1,5 +1,6 @@
 package com.sosimpact
-
+import android.view.Gravity
+import android.widget.LinearLayout
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -20,20 +21,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var impactTime = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    super.onCreate(savedInstanceState)
 
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    val layout = LinearLayout(this)
+    layout.orientation = LinearLayout.VERTICAL
+    layout.setPadding(50, 200, 50, 50)
 
-        val button = Button(this)
-        button.text = "🚨 SOS"
-        button.setOnClickListener {
-            Toast.makeText(this, "🚨 SOS ATIVADO!", Toast.LENGTH_SHORT).show()
-        }
+    val button = Button(this)
+    button.text = "🚨 SOS"
+    
+    val params = LinearLayout.LayoutParams(
+        LinearLayout.LayoutParams.WRAP_CONTENT,
+        LinearLayout.LayoutParams.WRAP_CONTENT
+    )
+    params.gravity = Gravity.CENTER
 
-        setContentView(button)
+    button.layoutParams = params
+
+    button.setOnClickListener {
+        Toast.makeText(this, "SOS ACTIVATED!", Toast.LENGTH_SHORT).show()
     }
 
+    layout.addView(button)
+    setContentView(layout)
+}
     override fun onResume() {
         super.onResume()
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
