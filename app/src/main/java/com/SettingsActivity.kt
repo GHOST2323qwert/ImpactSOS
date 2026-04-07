@@ -1,10 +1,16 @@
 package com.sosimpact
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 
 class SettingsActivity : AppCompatActivity() {
+
+    val PICK_CONTACT = 1
+    lateinit var contactText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -14,14 +20,30 @@ class SettingsActivity : AppCompatActivity() {
         layout.setPadding(50, 50, 50, 50)
 
         // 🔙 Botão voltar
-val backButton = Button(this)
-backButton.text = "← Voltar"
+        val backButton = Button(this)
+        backButton.text = "← Voltar"
+        backButton.setOnClickListener {
+            finish()
+        }
+        layout.addView(backButton)
 
-backButton.setOnClickListener {
-    finish() // fecha esta activity e volta atrás
-}
+        // 📞 CONTACTO
+        val contactButton = Button(this)
+        contactButton.text = "Escolher Contacto"
 
-layout.addView(backButton)
+        contactText = TextView(this)
+        contactText.text = "Nenhum contacto selecionado"
+
+        contactButton.setOnClickListener {
+            val intent = Intent(
+                Intent.ACTION_PICK,
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI
+            )
+            startActivityForResult(intent, PICK_CONTACT)
+        }
+
+        layout.addView(contactButton)
+        layout.addView(contactText)
 
         // Sensibilidade
         val sensitivityText = TextView(this)
@@ -60,4 +82,31 @@ layout.addView(backButton)
 
         setContentView(layout)
     }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == PICK_CONTACT && resultCode == Activity.RESULT_OK) {
+            val uri = data?.data
+            val cursor = contentResolver.query(uri!!, null, null, null, null)
+
+            if (cursor != null && cursor.moveToFirst()) {
+
+                val nameIndex = cursor.getColumnIndex(
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                )
+                val numberIndex = cursor.getColumnIndex(
+                    ContactsContract.CommonDataKinds.Phone.NUMBER
+                )
+
+                val name = cursor.getString(nameIndex)
+                val number = cursor.getString(numberIndex)
+
+                contactText.text = "Selecionado:\n$name\n$number"
+
+                cursor.close()
+            }
+        }
+    }
 }
+
