@@ -29,25 +29,44 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         // 🔴 MAIN CONTENT
         val layout = LinearLayout(this)
-        layout.orientation = LinearLayout.VERTICAL
-        layout.setPadding(50, 200, 50, 50)
+layout.orientation = LinearLayout.VERTICAL
+layout.setPadding(50, 50, 50, 50)
+layout.gravity = Gravity.BOTTOM   // 👈 isto mete no fundo
 
-        val sosButton = Button(this)
-        sosButton.text = "🚨 SOS"
+val button = Button(this)
 
-        sosButton.setOnClickListener {
-            Toast.makeText(this, "SOS ACTIVATED!", Toast.LENGTH_SHORT).show()
-        }
+var isActive = false
 
-        val openMenu = Button(this)
-        openMenu.text = "☰ Menu"
+button.text = "SOS OFF"
+button.setBackgroundColor(android.graphics.Color.RED)
+button.setTextColor(android.graphics.Color.WHITE)
 
-        openMenu.setOnClickListener {
-            drawerLayout.openDrawer(Gravity.RIGHT)
-        }
+// tamanho + forma
+button.setPadding(100, 100, 100, 100)
 
-        layout.addView(openMenu)
-        layout.addView(sosButton)
+val params = LinearLayout.LayoutParams(
+    300,
+    300
+)
+params.gravity = Gravity.CENTER_HORIZONTAL
+button.layoutParams = params
+
+button.setOnClickListener {
+    isActive = !isActive
+
+    if (isActive) {
+        button.text = "SOS ON"
+        button.setBackgroundColor(android.graphics.Color.GREEN)
+        Toast.makeText(this, "SOS ATIVADO", Toast.LENGTH_SHORT).show()
+    } else {
+        button.text = "SOS OFF"
+        button.setBackgroundColor(android.graphics.Color.RED)
+        Toast.makeText(this, "SOS DESATIVADO", Toast.LENGTH_SHORT).show()
+    }
+}
+
+layout.addView(button)
+setContentView(layout)
 
         // 📌 MENU LATERAL
         val navView = NavigationView(this)
