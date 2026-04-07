@@ -98,10 +98,11 @@ setContentView(layout)
 
     override fun onResume() {
         super.onResume()
-        accelerometer?.also {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
-        }
+        
+      accelerometer?.also {
+        sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
     }
+}
 
     override fun onPause() {
         super.onPause()
