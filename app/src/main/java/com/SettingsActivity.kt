@@ -83,30 +83,38 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(layout)
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == PICK_CONTACT && resultCode == Activity.RESULT_OK) {
-            val uri = data?.data
-            val cursor = contentResolver.query(uri!!, null, null, null, null)
 
-            if (cursor != null && cursor.moveToFirst()) {
+            val uri = data?.data ?: return
+            val cursor = contentResolver.query(uri, null, null, null, null)
 
-                val nameIndex = cursor.getColumnIndex(
-                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-                )
-                val numberIndex = cursor.getColumnIndex(
-                    ContactsContract.CommonDataKinds.Phone.NUMBER
-                )
+            cursor?.use {
 
-                val name = cursor.getString(nameIndex)
-                val number = cursor.getString(numberIndex)
+                if (it.moveToFirst()) {
 
-                contactText.text = "Selecionado:\n$name\n$number"
+                    val nameIndex = it.getColumnIndex(
+                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                    )
+                    val numberIndex = it.getColumnIndex(
+                        ContactsContract.CommonDataKinds.Phone.NUMBER
+                    )
 
-                cursor.close()
+                    val name = it.getString(nameIndex)
+                    val number = it.getString(numberIndex)
+
+                    contactText.text = "Selecionado:\n$name\n$number"
+                }
             }
         }
     }
 }
+
+
+
+
+
 
