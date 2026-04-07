@@ -24,13 +24,17 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
 
+    // 🔧 Inicializar sensores (FALTAVA ISTO)
+    sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+    accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
     val layout = LinearLayout(this)
     layout.orientation = LinearLayout.VERTICAL
     layout.setPadding(50, 200, 50, 50)
 
     val button = Button(this)
     button.text = "🚨 SOS"
-    
+
     val params = LinearLayout.LayoutParams(
         LinearLayout.LayoutParams.WRAP_CONTENT,
         LinearLayout.LayoutParams.WRAP_CONTENT
