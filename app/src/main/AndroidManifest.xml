@@ -9,7 +9,7 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".AboutActivity" />
-
+<uses-permission android:name="android.permission.READ_CONTACTS"/>
         <activity
             android:name=".MainActivity"
             android:exported="true">
