@@ -1,15 +1,13 @@
 package com.sosimpact
 
-import android.view.Gravity
-import android.widget.LinearLayout
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
+import android.content.Intent
+import android.hardware.*
 import android.os.Bundle
-import android.widget.Button
-import android.widget.Toast
+import android.view.Gravity
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.drawerlayout.widget.DrawerLayout
+import com.google.android.material.navigation.NavigationView
 import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -22,39 +20,68 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var impactTime = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
+        super.onCreate(savedInstanceState)
 
-    // 🔧 Inicializar sensores (FALTAVA ISTO)
-    sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-    accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-    val layout = LinearLayout(this)
-    layout.orientation = LinearLayout.VERTICAL
-    layout.setPadding(50, 200, 50, 50)
+        val drawerLayout = DrawerLayout(this)
 
-    val button = Button(this)
-    button.text = "🚨 SOS"
+        // 🔴 MAIN CONTENT
+        val layout = LinearLayout(this)
+        layout.orientation = LinearLayout.VERTICAL
+        layout.setPadding(50, 200, 50, 50)
 
-    val params = LinearLayout.LayoutParams(
-        LinearLayout.LayoutParams.WRAP_CONTENT,
-        LinearLayout.LayoutParams.WRAP_CONTENT
-    )
-    params.gravity = Gravity.CENTER
+        val sosButton = Button(this)
+        sosButton.text = "🚨 SOS"
 
-    button.layoutParams = params
+        sosButton.setOnClickListener {
+            Toast.makeText(this, "SOS ACTIVATED!", Toast.LENGTH_SHORT).show()
+        }
 
-    button.setOnClickListener {
-        Toast.makeText(this, "SOS ACTIVATED!", Toast.LENGTH_SHORT).show()
+        val openMenu = Button(this)
+        openMenu.text = "☰ Menu"
+
+        openMenu.setOnClickListener {
+            drawerLayout.openDrawer(Gravity.RIGHT)
+        }
+
+        layout.addView(openMenu)
+        layout.addView(sosButton)
+
+        // 📌 MENU LATERAL
+        val navView = NavigationView(this)
+
+        val menu = navView.menu
+        menu.add("Definições")
+        menu.add("Sobre a App")
+
+        navView.setNavigationItemSelectedListener {
+            when (it.title) {
+                "Definições" -> startActivity(Intent(this, SettingsActivity::class.java))
+                "Sobre a App" -> startActivity(Intent(this, AboutActivity::class.java))
+            }
+            drawerLayout.closeDrawer(Gravity.RIGHT)
+            true
+        }
+
+        val navParams = DrawerLayout.LayoutParams(
+            DrawerLayout.LayoutParams.WRAP_CONTENT,
+            DrawerLayout.LayoutParams.MATCH_PARENT
+        )
+        navParams.gravity = Gravity.RIGHT
+
+        drawerLayout.addView(layout)
+        drawerLayout.addView(navView, navParams)
+
+        setContentView(drawerLayout)
     }
 
-    layout.addView(button)
-    setContentView(layout)
-}
     override fun onResume() {
         super.onResume()
         accelerometer?.also {
-    sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
-}
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        }
     }
 
     override fun onPause() {
@@ -70,13 +97,11 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val gForce = sqrt((x * x + y * y + z * z)) / SensorManager.GRAVITY_EARTH
         val currentTime = System.currentTimeMillis()
 
-        // Detect strong impact
         if (gForce > impactThreshold && !impactDetected) {
             impactDetected = true
             impactTime = currentTime
         }
 
-        // Check if user stayed still after impact
         if (impactDetected) {
             if (currentTime - impactTime > 3000) {
                 if (gForce < 1.2) {
