@@ -53,6 +53,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
         sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL)
+        accelerometer?.also {
+    sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+}
     }
 
     override fun onPause() {
