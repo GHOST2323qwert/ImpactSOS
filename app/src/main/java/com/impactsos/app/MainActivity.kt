@@ -1,5 +1,6 @@
 package com.sosimpact
 
+import android.content.Intent
 import android.hardware.*
 import android.os.Bundle
 import android.view.Gravity
@@ -21,13 +22,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 🔧 sensores
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         val drawerLayout = DrawerLayout(this)
 
-        // 🔴 MAIN CONTENT
+        // 🔴 MAIN UI
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
         layout.gravity = Gravity.BOTTOM
@@ -47,7 +47,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         button.setOnClickListener {
             isActive = !isActive
-
             if (isActive) {
                 button.text = "SOS ON"
                 button.setBackgroundColor(android.graphics.Color.GREEN)
@@ -61,13 +60,15 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         layout.addView(button)
 
-        // 📌 MENU LATERAL
+        // 📌 MENU
         val navView = NavigationView(this)
         val menu = navView.menu
         menu.add("Definições")
-        menu.add("Sobre a App")
 
         navView.setNavigationItemSelectedListener {
+            when (it.title) {
+                "Definições" -> startActivity(Intent(this, SettingsActivity::class.java))
+            }
             drawerLayout.closeDrawer(Gravity.RIGHT)
             true
         }
@@ -121,4 +122,3 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
-
