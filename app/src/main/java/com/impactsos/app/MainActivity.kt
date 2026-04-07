@@ -69,7 +69,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         navView.setNavigationItemSelectedListener {
             drawerLayout.closeDrawer(Gravity.RIGHT)
             true
-        }
 
         val navParams = DrawerLayout.LayoutParams(
             DrawerLayout.LayoutParams.WRAP_CONTENT,
@@ -81,7 +80,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         drawerLayout.addView(navView, navParams)
 
         setContentView(drawerLayout)
-    }
 
     override fun onResume() {
         super.onResume()
