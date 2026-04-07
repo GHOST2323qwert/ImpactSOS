@@ -22,9 +22,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+       sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
+if (accelerometer == null) {
+    Toast.makeText(this, "Sensor não disponível", Toast.LENGTH_LONG).show()
+}
         val drawerLayout = DrawerLayout(this)
 
         // 🔴 MAIN CONTENT
