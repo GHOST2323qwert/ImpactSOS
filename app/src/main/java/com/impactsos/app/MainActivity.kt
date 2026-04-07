@@ -19,79 +19,76 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var impactDetected = false
     var impactTime = 0L
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+   override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
 
-       sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
+    accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
-if (accelerometer == null) {
-    Toast.makeText(this, "Sensor não disponível", Toast.LENGTH_LONG).show()
-}
-        val drawerLayout = DrawerLayout(this)
-
-        // 🔴 MAIN CONTENT
-        val layout = LinearLayout(this)
-layout.orientation = LinearLayout.VERTICAL
-layout.setPadding(50, 50, 50, 50)
-layout.gravity = Gravity.BOTTOM   // 👈 isto mete no fundo
-
-val button = Button(this)
-
-var isActive = false
-
-button.text = "SOS OFF"
-button.setBackgroundColor(android.graphics.Color.RED)
-button.setTextColor(android.graphics.Color.WHITE)
-
-// tamanho + forma
-button.setPadding(100, 100, 100, 100)
-
-val params = LinearLayout.LayoutParams(
-    300,
-    300
-)
-params.gravity = Gravity.CENTER_HORIZONTAL
-button.layoutParams = params
-
-button.setOnClickListener {
-    isActive = !isActive
-
-    if (isActive) {
-        button.text = "SOS ON"
-        button.setBackgroundColor(android.graphics.Color.GREEN)
-        Toast.makeText(this, "SOS ATIVADO", Toast.LENGTH_SHORT).show()
-    } else {
-        button.text = "SOS OFF"
-        button.setBackgroundColor(android.graphics.Color.RED)
-        Toast.makeText(this, "SOS DESATIVADO", Toast.LENGTH_SHORT).show()
+    if (accelerometer == null) {
+        Toast.makeText(this, "Sensor não disponível", Toast.LENGTH_LONG).show()
     }
-}
 
-layout.addView(button)
-setContentView(layout)
+    val drawerLayout = DrawerLayout(this)
 
-        // 📌 MENU LATERAL
-        val navView = NavigationView(this)
+    // 🔴 MAIN CONTENT
+    val layout = LinearLayout(this)
+    layout.orientation = LinearLayout.VERTICAL
+    layout.setPadding(50, 50, 50, 50)
+    layout.gravity = Gravity.BOTTOM
 
-        val menu = navView.menu
-        menu.add("Definições")
-        menu.add("Sobre a App")
+    val button = Button(this)
+    var isActive = false
 
-        navView.setNavigationItemSelectedListener {
-            when (it.title) {
-               // "Definições" -> startActivity(Intent(this, SettingsActivity::class.java))
-                //"Sobre a App" -> startActivity(Intent(this, AboutActivity::class.java))
-            }
-            drawerLayout.closeDrawer(Gravity.RIGHT)
-            true
+    button.text = "SOS OFF"
+    button.setBackgroundColor(android.graphics.Color.RED)
+    button.setTextColor(android.graphics.Color.WHITE)
+
+    button.setPadding(100, 100, 100, 100)
+
+    val params = LinearLayout.LayoutParams(300, 300)
+    params.gravity = Gravity.CENTER_HORIZONTAL
+    button.layoutParams = params
+
+    button.setOnClickListener {
+        isActive = !isActive
+        if (isActive) {
+            button.text = "SOS ON"
+            button.setBackgroundColor(android.graphics.Color.GREEN)
+            Toast.makeText(this, "SOS ATIVADO", Toast.LENGTH_SHORT).show()
+        } else {
+            button.text = "SOS OFF"
+            button.setBackgroundColor(android.graphics.Color.RED)
+            Toast.makeText(this, "SOS DESATIVADO", Toast.LENGTH_SHORT).show()
         }
+    }
 
-        val navParams = DrawerLayout.LayoutParams(
-            DrawerLayout.LayoutParams.WRAP_CONTENT,
-            DrawerLayout.LayoutParams.MATCH_PARENT
-        )
-        navParams.gravity = Gravity.RIGHT
+    layout.addView(button)
+
+    // 📌 MENU LATERAL
+    val navView = NavigationView(this)
+    val menu = navView.menu
+    menu.add("Definições")
+    menu.add("Sobre a App")
+
+    navView.setNavigationItemSelectedListener {
+        drawerLayout.closeDrawer(Gravity.RIGHT)
+        true
+    }
+
+    val navParams = DrawerLayout.LayoutParams(
+        DrawerLayout.LayoutParams.WRAP_CONTENT,
+        DrawerLayout.LayoutParams.MATCH_PARENT
+    )
+    navParams.gravity = Gravity.RIGHT
+
+    // ✅ AQUI É A ORDEM CERTA
+    drawerLayout.addView(layout)
+    drawerLayout.addView(navView, navParams)
+
+    // ✅ SÓ UMA VEZ
+    setContentView(drawerLayout)
+}
 
         drawerLayout.addView(layout)
         drawerLayout.addView(navView, navParams)
