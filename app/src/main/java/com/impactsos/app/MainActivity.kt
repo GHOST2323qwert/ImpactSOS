@@ -9,12 +9,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
 import kotlin.math.sqrt
+import android.telephony.SmsManager
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
-
     var impactThreshold = 1.0
     var impactDetected = false
     var impactTime = 0L
@@ -46,11 +46,32 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         button.layoutParams = params
 
         button.setOnClickListener {
+
             isActive = !isActive
+
             if (isActive) {
                 button.text = "SOS ON"
                 button.setBackgroundColor(android.graphics.Color.GREEN)
-                Toast.makeText(this, "SOS ATIVADO", Toast.LENGTH_SHORT).show()
+
+                // 🔥 ENVIAR SMS
+                val prefs = getSharedPreferences("SOS", MODE_PRIVATE)
+                val numero = prefs.getString("numero", null)
+
+                if (numero != null) {
+                    val smsManager = SmsManager.getDefault()
+                    smsManager.sendTextMessage(
+                        numero,
+                        null,
+                        "🚨 SOS! Preciso de ajuda!",
+                        null,
+                        null
+                    )
+
+                    Toast.makeText(this, "SMS enviado!", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Nenhum contacto definido!", Toast.LENGTH_SHORT).show()
+                }
+
             } else {
                 button.text = "SOS OFF"
                 button.setBackgroundColor(android.graphics.Color.RED)
@@ -118,6 +139,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 impactDetected = false
             }
         }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+}
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
