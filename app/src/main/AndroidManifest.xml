@@ -1,7 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- 🔐 PERMISSÃO (fica aqui, FORA da application) -->
+    <!-- 🔐 PERMISSÕES -->
     <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.SEND_SMS"/>
 
     <application
         android:label="ImpactSOS"
