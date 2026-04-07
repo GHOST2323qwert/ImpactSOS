@@ -1,4 +1,3 @@
-
 package com.sosimpact
 
 import android.os.Bundle
