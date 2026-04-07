@@ -5,7 +5,8 @@
     android:icon="@mipmap/ic_launcher"
     android:roundIcon="@mipmap/ic_launcher"
     android:theme="@style/Theme.AppCompat.Light">
-        
+    
+        <activity android:name=".SettingsActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".AboutActivity" />
 
