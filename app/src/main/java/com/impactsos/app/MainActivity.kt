@@ -1,14 +1,17 @@
 package com.sosimpact
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.*
 import android.os.Bundle
+import android.telephony.SmsManager
 import android.view.Gravity
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
-import android.telephony.SmsManager
 import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -23,12 +26,19 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // 🔐 pedir permissão SMS
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.SEND_SMS),
+            1
+        )
+
         sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         val drawerLayout = DrawerLayout(this)
 
-        // 🔴 MAIN UI
+        // 🔴 UI PRINCIPAL
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
         layout.gravity = Gravity.BOTTOM
@@ -47,6 +57,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         button.layoutParams = params
 
         button.setOnClickListener {
+
             isActive = !isActive
 
             if (isActive) {
@@ -61,7 +72,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         smsManager.sendTextMessage(
                             number,
                             null,
-                            "🚨 EMERGÊNCIA! Preciso de ajuda!",
+                            "🚨 SOS! Preciso de ajuda!",
                             null,
                             null
                         )
@@ -70,7 +81,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         Toast.makeText(this, "Erro ao enviar SMS", Toast.LENGTH_SHORT).show()
                     }
                 } else {
-                    Toast.makeText(this, "Escolhe um contacto primeiro!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Escolhe um contacto primeiro!", Toast.LENGTH_SHORT).show()
                 }
 
             } else {
@@ -140,6 +151,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 impactDetected = false
             }
         }
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+}
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
