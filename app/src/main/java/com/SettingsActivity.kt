@@ -1,4 +1,3 @@
-
 package com.sosimpact
 
 import android.app.Activity
@@ -13,6 +12,8 @@ class SettingsActivity : AppCompatActivity() {
     companion object {
         var selectedNumber: String? = null
         var sendLocation: Boolean = true
+        var useSMS: Boolean = true
+        var useCall: Boolean = false
     }
 
     val PICK_CONTACT = 1
@@ -49,15 +50,34 @@ class SettingsActivity : AppCompatActivity() {
         layout.addView(contactButton)
         layout.addView(contactText)
 
-        // 📍 LOCALIZAÇÃO
+        // ⚙️ SISTEMA SOS
+        val sosTitle = TextView(this)
+        sosTitle.text = "⚙️ Sistema SOS"
+        layout.addView(sosTitle)
+
+        val smsSwitch = Switch(this)
+        smsSwitch.text = "Enviar SMS"
+        smsSwitch.isChecked = true
+        smsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            useSMS = isChecked
+        }
+
+        val callSwitch = Switch(this)
+        callSwitch.text = "Fazer chamada automática"
+        callSwitch.isChecked = false
+        callSwitch.setOnCheckedChangeListener { _, isChecked ->
+            useCall = isChecked
+        }
+
         val locationSwitch = Switch(this)
         locationSwitch.text = "Enviar Localização"
         locationSwitch.isChecked = true
-
         locationSwitch.setOnCheckedChangeListener { _, isChecked ->
             sendLocation = isChecked
         }
 
+        layout.addView(smsSwitch)
+        layout.addView(callSwitch)
         layout.addView(locationSwitch)
 
         setContentView(layout)
