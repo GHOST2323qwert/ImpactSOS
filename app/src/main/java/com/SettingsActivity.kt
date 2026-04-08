@@ -34,7 +34,14 @@ class SettingsActivity : AppCompatActivity() {
         // 📞 CONTACTO
         val contactButton = Button(this)
         contactButton.text = "Escolher Contacto"
+         
+        val name = it.getString(nameIndex)
+        val number = it.getString(numberIndex)
 
+        // 👇 guardar número globalmente
+        selectedNumber = number
+
+        contactText.text = "Selecionado:\n$name\n$number"
         contactText = TextView(this)
         contactText.text = "Nenhum contacto selecionado"
 
