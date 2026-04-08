@@ -8,13 +8,14 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import com.google.android.material.navigation.NavigationView
-import kotlin.math.sqrt
 import android.telephony.SmsManager
+import kotlin.math.sqrt
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
 
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
+
     var impactThreshold = 1.0
     var impactDetected = false
     var impactTime = 0L
@@ -46,30 +47,30 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         button.layoutParams = params
 
         button.setOnClickListener {
-
             isActive = !isActive
 
             if (isActive) {
                 button.text = "SOS ON"
                 button.setBackgroundColor(android.graphics.Color.GREEN)
 
-                // 🔥 ENVIAR SMS
-                val prefs = getSharedPreferences("SOS", MODE_PRIVATE)
-                val numero = prefs.getString("numero", null)
+                val number = SettingsActivity.selectedNumber
 
-                if (numero != null) {
-                    val smsManager = SmsManager.getDefault()
-                    smsManager.sendTextMessage(
-                        numero,
-                        null,
-                        "🚨 SOS! Preciso de ajuda!",
-                        null,
-                        null
-                    )
-
-                    Toast.makeText(this, "SMS enviado!", Toast.LENGTH_SHORT).show()
+                if (number != null) {
+                    try {
+                        val smsManager = SmsManager.getDefault()
+                        smsManager.sendTextMessage(
+                            number,
+                            null,
+                            "🚨 EMERGÊNCIA! Preciso de ajuda!",
+                            null,
+                            null
+                        )
+                        Toast.makeText(this, "SMS enviado!", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(this, "Erro ao enviar SMS", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
-                    Toast.makeText(this, "Nenhum contacto definido!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Escolhe um contacto primeiro!", Toast.LENGTH_LONG).show()
                 }
 
             } else {
@@ -139,10 +140,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 impactDetected = false
             }
         }
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-}
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
