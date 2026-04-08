@@ -2,7 +2,6 @@ package com.sosimpact
 
 import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.hardware.*
 import android.os.Bundle
 import android.telephony.SmsManager
@@ -26,7 +25,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 🔐 pedir permissão SMS
+        // 🔐 permissão SMS
         ActivityCompat.requestPermissions(
             this,
             arrayOf(Manifest.permission.SEND_SMS),
@@ -104,7 +103,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
             drawerLayout.closeDrawer(Gravity.RIGHT)
             true
-        }
+        } // ✅ FECHO QUE FALTAVA
 
         val navParams = DrawerLayout.LayoutParams(
             DrawerLayout.LayoutParams.WRAP_CONTENT,
@@ -151,10 +150,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 impactDetected = false
             }
         }
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-}
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
