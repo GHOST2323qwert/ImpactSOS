@@ -1,3 +1,4 @@
+
 package com.sosimpact
 
 import android.app.Activity
@@ -11,6 +12,7 @@ class SettingsActivity : AppCompatActivity() {
 
     companion object {
         var selectedNumber: String? = null
+        var sendLocation: Boolean = true
     }
 
     val PICK_CONTACT = 1
@@ -23,12 +25,10 @@ class SettingsActivity : AppCompatActivity() {
         layout.orientation = LinearLayout.VERTICAL
         layout.setPadding(50, 50, 50, 50)
 
-        // 🔙 Botão voltar
+        // 🔙 voltar
         val backButton = Button(this)
         backButton.text = "← Voltar"
-        backButton.setOnClickListener {
-            finish()
-        }
+        backButton.setOnClickListener { finish() }
         layout.addView(backButton)
 
         // 📞 CONTACTO
@@ -49,71 +49,42 @@ class SettingsActivity : AppCompatActivity() {
         layout.addView(contactButton)
         layout.addView(contactText)
 
-        // Sensibilidade
-        val sensitivityText = TextView(this)
-        sensitivityText.text = "Sensibilidade do Impacto"
-
-        val sensitivitySeek = SeekBar(this)
-        sensitivitySeek.max = 20
-        sensitivitySeek.progress = 10
-
-        // Tempo
-        val timeText = TextView(this)
-        timeText.text = "Tempo para ativar SOS (segundos)"
-
-        val timeSeek = SeekBar(this)
-        timeSeek.max = 10
-        timeSeek.progress = 3
-
-        // Som
-        val soundSwitch = Switch(this)
-        soundSwitch.text = "Som de Alerta"
-        soundSwitch.isChecked = true
-
-        // Localização
+        // 📍 LOCALIZAÇÃO
         val locationSwitch = Switch(this)
         locationSwitch.text = "Enviar Localização"
         locationSwitch.isChecked = true
 
-        layout.addView(sensitivityText)
-        layout.addView(sensitivitySeek)
-        layout.addView(timeText)
-        layout.addView(timeSeek)
-        layout.addView(soundSwitch)
+        locationSwitch.setOnCheckedChangeListener { _, isChecked ->
+            sendLocation = isChecked
+        }
+
         layout.addView(locationSwitch)
 
         setContentView(layout)
     }
 
-    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == PICK_CONTACT && resultCode == Activity.RESULT_OK) {
-
             val uri = data?.data ?: return
-
             val cursor = contentResolver.query(uri, null, null, null, null)
 
-            if (cursor != null && cursor.moveToFirst()) {
+            cursor?.use {
+                if (it.moveToFirst()) {
+                    val nameIndex = it.getColumnIndex(
+                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                    )
+                    val numberIndex = it.getColumnIndex(
+                        ContactsContract.CommonDataKinds.Phone.NUMBER
+                    )
 
-                val nameIndex = cursor.getColumnIndex(
-                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-                )
+                    val name = it.getString(nameIndex)
+                    val number = it.getString(numberIndex)
 
-                val numberIndex = cursor.getColumnIndex(
-                    ContactsContract.CommonDataKinds.Phone.NUMBER
-                )
-
-                val name = cursor.getString(nameIndex)
-                val number = cursor.getString(numberIndex)
-
-                // 👇 guardar número global
-                selectedNumber = number
-
-                contactText.text = "Selecionado:\n$name\n$number"
-
-                cursor.close()
+                    selectedNumber = number
+                    contactText.text = "Selecionado:\n$name\n$number"
+                }
             }
         }
     }
