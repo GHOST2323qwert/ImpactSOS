@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 🔐 permissão SMS
+        // 🔐 permissões
         ActivityCompat.requestPermissions(
             this,
             arrayOf(Manifest.permission.SEND_SMS),
@@ -56,32 +56,13 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         button.layoutParams = params
 
         button.setOnClickListener {
-
             isActive = !isActive
 
             if (isActive) {
                 button.text = "SOS ON"
                 button.setBackgroundColor(android.graphics.Color.GREEN)
 
-                val number = SettingsActivity.selectedNumber
-
-                if (number != null) {
-                    try {
-                        val smsManager = SmsManager.getDefault()
-                        smsManager.sendTextMessage(
-                            number,
-                            null,
-                            "🚨 SOS! Preciso de ajuda!",
-                            null,
-                            null
-                        )
-                        Toast.makeText(this, "SMS enviado!", Toast.LENGTH_SHORT).show()
-                    } catch (e: Exception) {
-                        Toast.makeText(this, "Erro ao enviar SMS", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(this, "Escolhe um contacto primeiro!", Toast.LENGTH_SHORT).show()
-                }
+                sendSOS()
 
             } else {
                 button.text = "SOS OFF"
@@ -103,7 +84,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             }
             drawerLayout.closeDrawer(Gravity.RIGHT)
             true
-        } // ✅ FECHO QUE FALTAVA
+        }
 
         val navParams = DrawerLayout.LayoutParams(
             DrawerLayout.LayoutParams.WRAP_CONTENT,
@@ -115,6 +96,34 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         drawerLayout.addView(navView, navParams)
 
         setContentView(drawerLayout)
+    }
+
+    // 🚨 FUNÇÃO SOS (SMS + futuro chamada)
+    private fun sendSOS() {
+        val number = SettingsActivity.selectedNumber
+
+        if (number != null) {
+            try {
+                val smsManager = SmsManager.getDefault()
+                smsManager.sendTextMessage(
+                    number,
+                    null,
+                    "🚨 SOS! Preciso de ajuda!",
+                    null,
+                    null
+                )
+
+                Toast.makeText(this, "SMS enviado!", Toast.LENGTH_SHORT).show()
+
+                // 📞 (vamos ligar depois com definições)
+                // callEmergency(number)
+
+            } catch (e: Exception) {
+                Toast.makeText(this, "Erro ao enviar SMS", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            Toast.makeText(this, "Escolhe um contacto primeiro!", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onResume() {
@@ -146,6 +155,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             if (currentTime - impactTime > 3000) {
                 if (gForce < 1.2) {
                     Toast.makeText(this, "🚨 POSSÍVEL ACIDENTE DETETADO!", Toast.LENGTH_LONG).show()
+
+                    // 👇 aqui também pode disparar SOS automático
+                    sendSOS()
                 }
                 impactDetected = false
             }
