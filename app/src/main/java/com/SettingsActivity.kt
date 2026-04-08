@@ -9,6 +9,10 @@ import androidx.appcompat.app.AppCompatActivity
 
 class SettingsActivity : AppCompatActivity() {
 
+     companion object {
+        var selectedNumber: String? = null
+    }
+
     val PICK_CONTACT = 1
     lateinit var contactText: TextView
 
