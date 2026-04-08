@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 class SettingsActivity : AppCompatActivity() {
 
-     companion object {
+    companion object {
         var selectedNumber: String? = null
     }
 
@@ -34,14 +34,7 @@ class SettingsActivity : AppCompatActivity() {
         // 📞 CONTACTO
         val contactButton = Button(this)
         contactButton.text = "Escolher Contacto"
-         
-        val name = it.getString(nameIndex)
-        val number = it.getString(numberIndex)
 
-        // 👇 guardar número globalmente
-        selectedNumber = number
-
-        contactText.text = "Selecionado:\n$name\n$number"
         contactText = TextView(this)
         contactText.text = "Nenhum contacto selecionado"
 
@@ -84,10 +77,8 @@ class SettingsActivity : AppCompatActivity() {
 
         layout.addView(sensitivityText)
         layout.addView(sensitivitySeek)
-
         layout.addView(timeText)
         layout.addView(timeSeek)
-
         layout.addView(soundSwitch)
         layout.addView(locationSwitch)
 
@@ -101,31 +92,29 @@ class SettingsActivity : AppCompatActivity() {
         if (requestCode == PICK_CONTACT && resultCode == Activity.RESULT_OK) {
 
             val uri = data?.data ?: return
+
             val cursor = contentResolver.query(uri, null, null, null, null)
 
-            cursor?.use {
+            if (cursor != null && cursor.moveToFirst()) {
 
-                if (it.moveToFirst()) {
+                val nameIndex = cursor.getColumnIndex(
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
+                )
 
-                    val nameIndex = it.getColumnIndex(
-                        ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
-                    )
-                    val numberIndex = it.getColumnIndex(
-                        ContactsContract.CommonDataKinds.Phone.NUMBER
-                    )
+                val numberIndex = cursor.getColumnIndex(
+                    ContactsContract.CommonDataKinds.Phone.NUMBER
+                )
 
-                    val name = it.getString(nameIndex)
-                    val number = it.getString(numberIndex)
+                val name = cursor.getString(nameIndex)
+                val number = cursor.getString(numberIndex)
 
-                    contactText.text = "Selecionado:\n$name\n$number"
-                }
+                // 👇 guardar número global
+                selectedNumber = number
+
+                contactText.text = "Selecionado:\n$name\n$number"
+
+                cursor.close()
             }
         }
     }
 }
-
-
-
-
-
-
