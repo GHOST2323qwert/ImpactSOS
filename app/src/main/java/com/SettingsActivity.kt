@@ -94,7 +94,7 @@ class SettingsActivity : AppCompatActivity() {
         layout.addView(callSwitch)
         layout.addView(locationSwitch)
 
-        // ⚡ IMPACTO (AQUI ESTÁ O QUE PEDISTE)
+        // ⚡ IMPACTO
         val impactInput = EditText(this)
         impactInput.hint = "Valor de impacto (G)"
         impactInput.setText(prefs.getFloat("impact", 2.5f).toString())
@@ -118,8 +118,8 @@ class SettingsActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (requestCode == PICK_CONTACT && resultCode == Activity.RESULT_OK) {
-            val uri = data?.data ?: return
 
+            val uri = data?.data ?: return
             val cursor = contentResolver.query(uri, null, null, null, null)
 
             cursor?.use {
@@ -138,6 +138,8 @@ class SettingsActivity : AppCompatActivity() {
 
                     selectedNumber = number
 
+                    // ✅ CORREÇÃO AQUI
+                    val prefs = getSharedPreferences("SOS_PREFS", Context.MODE_PRIVATE)
                     prefs.edit().putString("number", number).apply()
 
                     contactText.text = "Selecionado:\n$name\n$number"
