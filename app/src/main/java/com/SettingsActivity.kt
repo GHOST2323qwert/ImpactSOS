@@ -16,7 +16,7 @@ class SettingsActivity : AppCompatActivity() {
         var sendLocation: Boolean = true
         var useSMS: Boolean = true
         var useCall: Boolean = false
-        var impactValue: Double = 3.0 // 🔥 NOVO
+        var impactValue: Double = 3.0
     }
 
     val PICK_CONTACT = 1
@@ -27,24 +27,24 @@ class SettingsActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences("SOS_PREFS", Context.MODE_PRIVATE)
 
-        // 🔁 carregar dados guardados
+        // carregar dados
         selectedNumber = prefs.getString("number", null)
         useSMS = prefs.getBoolean("sms", true)
         useCall = prefs.getBoolean("call", false)
         sendLocation = prefs.getBoolean("location", true)
-        impactValue = prefs.getFloat("impact", 3.0f).toDouble() // 🔥 NOVO
+        impactValue = prefs.getFloat("impact", 3.0f).toDouble()
 
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
         layout.setPadding(50, 50, 50, 50)
 
-        // 🔙 voltar
+        // botão voltar
         val backButton = Button(this)
         backButton.text = "← Voltar"
         backButton.setOnClickListener { finish() }
         layout.addView(backButton)
 
-        // 📞 CONTACTO
+        // CONTACTO
         val contactButton = Button(this)
         contactButton.text = "Escolher Contacto"
 
@@ -62,11 +62,7 @@ class SettingsActivity : AppCompatActivity() {
         layout.addView(contactButton)
         layout.addView(contactText)
 
-        // ⚙️ SISTEMA SOS
-        val sosTitle = TextView(this)
-        sosTitle.text = "⚙️ Sistema SOS"
-        layout.addView(sosTitle)
-
+        // SISTEMA SOS
         val smsSwitch = Switch(this)
         smsSwitch.text = "Enviar SMS"
         smsSwitch.isChecked = useSMS
@@ -95,7 +91,7 @@ class SettingsActivity : AppCompatActivity() {
         layout.addView(callSwitch)
         layout.addView(locationSwitch)
 
-        // 🔥 NOVO — VALOR DE IMPACTO
+        // 🔥 IMPACTO
         val impactLabel = TextView(this)
         impactLabel.text = "Valor de impacto (G)="
 
@@ -106,7 +102,6 @@ class SettingsActivity : AppCompatActivity() {
 
         impactInput.setText(impactValue.toString())
 
-        // guardar quando perde foco
         impactInput.setOnFocusChangeListener { _, hasFocus ->
             if (!hasFocus) {
                 val value = impactInput.text.toString().toDoubleOrNull()
@@ -147,7 +142,6 @@ class SettingsActivity : AppCompatActivity() {
 
                     selectedNumber = number
 
-                    // 💾 guardar
                     val prefs = getSharedPreferences("SOS_PREFS", Context.MODE_PRIVATE)
                     prefs.edit().putString("number", number).apply()
 
@@ -156,3 +150,4 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
     }
+}
