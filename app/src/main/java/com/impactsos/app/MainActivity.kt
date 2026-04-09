@@ -1,168 +1,135 @@
 package com.sosimpact
 
-import android.Manifest
+import android.app.Activity
 import android.content.Intent
-import android.hardware.*
 import android.os.Bundle
-import android.telephony.SmsManager
-import android.view.Gravity
+import android.provider.ContactsContract
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.drawerlayout.widget.DrawerLayout
-import com.google.android.material.navigation.NavigationView
-import kotlin.math.sqrt
 
-class MainActivity : AppCompatActivity(), SensorEventListener {
+class SettingsActivity : AppCompatActivity() {
 
-    lateinit var sensorManager: SensorManager
-    var accelerometer: Sensor? = null
+    companion object {
+        var selectedNumber: String? = null
+        var smsEnabled: Boolean = true
+        var callEnabled: Boolean = false
+    }
 
-    var impactThreshold = 1.0
-    var impactDetected = false
-    var impactTime = 0L
+    val PICK_CONTACT = 1
+    lateinit var contactText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 🔐 permissões
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(Manifest.permission.SEND_SMS),
-            1
-        )
-
-        sensorManager = getSystemService(SENSOR_SERVICE) as SensorManager
-        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
-
-        val drawerLayout = DrawerLayout(this)
-
-        // 🔴 UI PRINCIPAL
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
-        layout.gravity = Gravity.BOTTOM
         layout.setPadding(50, 50, 50, 50)
 
-        val button = Button(this)
-        var isActive = false
+        // 🔙 BOTÃO VOLTAR
+        val backButton = Button(this)
+        backButton.text = "← Voltar"
+        backButton.setOnClickListener {
+            finish()
+        }
+        layout.addView(backButton)
 
-        button.text = "SOS OFF"
-        button.setBackgroundColor(android.graphics.Color.RED)
-        button.setTextColor(android.graphics.Color.WHITE)
-        button.setPadding(100, 100, 100, 100)
+        // 📞 CONTACTO
+        val contactButton = Button(this)
+        contactButton.text = "Escolher Contacto"
 
-        val params = LinearLayout.LayoutParams(300, 300)
-        params.gravity = Gravity.CENTER_HORIZONTAL
-        button.layoutParams = params
+        contactText = TextView(this)
+        contactText.text = "Nenhum contacto selecionado"
 
-        button.setOnClickListener {
-            isActive = !isActive
-
-            if (isActive) {
-                button.text = "SOS ON"
-                button.setBackgroundColor(android.graphics.Color.GREEN)
-
-                sendSOS()
-
-            } else {
-                button.text = "SOS OFF"
-                button.setBackgroundColor(android.graphics.Color.RED)
-                Toast.makeText(this, "SOS DESATIVADO", Toast.LENGTH_SHORT).show()
-            }
+        contactButton.setOnClickListener {
+            val intent = Intent(
+                Intent.ACTION_PICK,
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI
+            )
+            startActivityForResult(intent, PICK_CONTACT)
         }
 
-        layout.addView(button)
+        layout.addView(contactButton)
+        layout.addView(contactText)
 
-        // 📌 MENU
-        val navView = NavigationView(this)
-        val menu = navView.menu
-        menu.add("Definições")
+        // ⚙️ SISTEMA SOS
+        val sosTitle = TextView(this)
+        sosTitle.text = "\n⚙️ Sistema SOS"
+        layout.addView(sosTitle)
 
-        navView.setNavigationItemSelectedListener {
-            when (it.title) {
-                "Definições" -> startActivity(Intent(this, SettingsActivity::class.java))
-            }
-            drawerLayout.closeDrawer(Gravity.RIGHT)
-            true
+        // SMS SWITCH
+        val smsSwitch = Switch(this)
+        smsSwitch.text = "Enviar SMS"
+        smsSwitch.isChecked = smsEnabled
+
+        smsSwitch.setOnCheckedChangeListener { _, isChecked ->
+            smsEnabled = isChecked
         }
 
-        val navParams = DrawerLayout.LayoutParams(
-            DrawerLayout.LayoutParams.WRAP_CONTENT,
-            DrawerLayout.LayoutParams.MATCH_PARENT
-        )
-        navParams.gravity = Gravity.RIGHT
+        layout.addView(smsSwitch)
 
-        drawerLayout.addView(layout)
-        drawerLayout.addView(navView, navParams)
+        // CHAMADA SWITCH
+        val callSwitch = Switch(this)
+        callSwitch.text = "Fazer chamada automática"
+        callSwitch.isChecked = callEnabled
 
-        setContentView(drawerLayout)
+        callSwitch.setOnCheckedChangeListener { _, isChecked ->
+            callEnabled = isChecked
+        }
+
+        layout.addView(callSwitch)
+
+        // OUTRAS DEFINIÇÕES (mantive as tuas)
+        val sensitivityText = TextView(this)
+        sensitivityText.text = "\nSensibilidade do Impacto"
+
+        val sensitivitySeek = SeekBar(this)
+        sensitivitySeek.max = 20
+        sensitivitySeek.progress = 10
+
+        val timeText = TextView(this)
+        timeText.text = "Tempo para ativar SOS (segundos)"
+
+        val timeSeek = SeekBar(this)
+        timeSeek.max = 10
+        timeSeek.progress = 3
+
+        layout.addView(sensitivityText)
+        layout.addView(sensitivitySeek)
+        layout.addView(timeText)
+        layout.addView(timeSeek)
+
+        setContentView(layout)
     }
 
-    // 🚨 FUNÇÃO SOS (SMS + futuro chamada)
-    private fun sendSOS() {
-        val number = SettingsActivity.selectedNumber
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
 
-        if (number != null) {
-            try {
-                val smsManager = SmsManager.getDefault()
-                smsManager.sendTextMessage(
-                    number,
-                    null,
-                    "🚨 SOS! Preciso de ajuda!",
-                    null,
-                    null
+        if (requestCode == PICK_CONTACT && resultCode == Activity.RESULT_OK) {
+            val uri = data?.data ?: return
+
+            val cursor = contentResolver.query(uri, null, null, null, null)
+
+            if (cursor != null && cursor.moveToFirst()) {
+
+                val nameIndex = cursor.getColumnIndex(
+                    ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
                 )
 
-                Toast.makeText(this, "SMS enviado!", Toast.LENGTH_SHORT).show()
+                val numberIndex = cursor.getColumnIndex(
+                    ContactsContract.CommonDataKinds.Phone.NUMBER
+                )
 
-                // 📞 (vamos ligar depois com definições)
-                // callEmergency(number)
+                val name = cursor.getString(nameIndex)
+                val number = cursor.getString(numberIndex)
 
-            } catch (e: Exception) {
-                Toast.makeText(this, "Erro ao enviar SMS", Toast.LENGTH_SHORT).show()
-            }
-        } else {
-            Toast.makeText(this, "Escolhe um contacto primeiro!", Toast.LENGTH_SHORT).show()
-        }
-    }
+                // 🔥 GUARDA GLOBAL
+                selectedNumber = number
 
-    override fun onResume() {
-        super.onResume()
-        accelerometer?.also {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
-        }
-    }
+                contactText.text = "Selecionado:\n$name\n$number"
 
-    override fun onPause() {
-        super.onPause()
-        sensorManager.unregisterListener(this)
-    }
-
-    override fun onSensorChanged(event: SensorEvent) {
-        val x = event.values[0]
-        val y = event.values[1]
-        val z = event.values[2]
-
-        val gForce = sqrt((x * x + y * y + z * z)) / SensorManager.GRAVITY_EARTH
-        val currentTime = System.currentTimeMillis()
-
-        if (gForce > impactThreshold && !impactDetected) {
-            impactDetected = true
-            impactTime = currentTime
-        }
-
-        if (impactDetected) {
-            if (currentTime - impactTime > 3000) {
-                if (gForce < 1.2) {
-                    Toast.makeText(this, "🚨 POSSÍVEL ACIDENTE DETETADO!", Toast.LENGTH_LONG).show()
-
-                    // 👇 aqui também pode disparar SOS automático
-                    sendSOS()
-                }
-                impactDetected = false
+                cursor.close()
             }
         }
     }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
 }
