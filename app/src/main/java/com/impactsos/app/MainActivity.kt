@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var sosPending = false
     var isActive = false
 
-    var impactThreshold = 3.0 // valor inicial
+    var impactThreshold = 3.0 // 🔥 valor inicial
 
     var impactDetected = false
     var impactTime = 0L
@@ -151,7 +151,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onResume() {
         super.onResume()
 
-        // 🔥 atualizar valor vindo das definições
+        // 🔥 LIGAÇÃO AO VALOR DAS DEFINIÇÕES (ISTO ERA O QUE FALTAVA)
         impactThreshold = SettingsActivity.impactValue
 
         accelerometer?.also {
