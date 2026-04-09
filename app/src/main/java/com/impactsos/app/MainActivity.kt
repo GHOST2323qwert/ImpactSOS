@@ -17,7 +17,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     lateinit var sensorManager: SensorManager
     var accelerometer: Sensor? = null
+
+    lateinit var button: Button
+
     var sosPending = false
+    var isActive = false
+
     var impactThreshold = 1.0
     var impactDetected = false
     var impactTime = 0L
@@ -42,8 +47,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         layout.gravity = Gravity.BOTTOM
         layout.setPadding(50, 50, 50, 50)
 
-        val button = Button(this)
-        var isActive = false
+        // 🔴 BOTÃO (AGORA GLOBAL)
+        button = Button(this)
 
         button.text = "SOS OFF"
         button.setBackgroundColor(android.graphics.Color.RED)
@@ -54,15 +59,27 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         button.layoutParams = params
 
         button.setOnClickListener {
+
+            // 🔴 SE HOUVER SOS PENDENTE → CANCELA
+            if (sosPending) {
+                sosPending = false
+                button.text = "SOS OFF"
+                button.setBackgroundColor(android.graphics.Color.RED)
+                Toast.makeText(this, "SOS CANCELADO", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            // ligar/desligar sistema
             isActive = !isActive
 
             if (isActive) {
                 button.text = "SOS ON"
                 button.setBackgroundColor(android.graphics.Color.GREEN)
-                sendSOS()
+                Toast.makeText(this, "Sistema ativo", Toast.LENGTH_SHORT).show()
             } else {
                 button.text = "SOS OFF"
                 button.setBackgroundColor(android.graphics.Color.RED)
+                Toast.makeText(this, "Sistema desligado", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -93,6 +110,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         setContentView(drawerLayout)
     }
 
+    // 🚨 FUNÇÃO SOS
     private fun sendSOS() {
         val number = SettingsActivity.selectedNumber
 
@@ -143,6 +161,9 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent) {
+
+        if (!isActive) return // 🔴 só funciona se sistema ligado
+
         val x = event.values[0]
         val y = event.values[1]
         val z = event.values[2]
@@ -158,8 +179,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (impactDetected) {
             if (currentTime - impactTime > 3000) {
                 if (gForce < 1.2) {
-                    Toast.makeText(this, "🚨 POSSÍVEL ACIDENTE!", Toast.LENGTH_LONG).show()
-                    sendSOS()
+
+                    Toast.makeText(this, "🚨 Acidente detetado! 5s para cancelar", Toast.LENGTH_LONG).show()
+
+                    sosPending = true
+                    button.text = "CANCELAR SOS"
+                    button.setBackgroundColor(android.graphics.Color.YELLOW)
+
+                    // ⏳ ESPERA 5 SEGUNDOS
+                    button.postDelayed({
+                        if (sosPending) {
+                            sendSOS()
+                            sosPending = false
+
+                            button.text = "SOS OFF"
+                            button.setBackgroundColor(android.graphics.Color.RED)
+                        }
+                    }, 5000)
                 }
                 impactDetected = false
             }
