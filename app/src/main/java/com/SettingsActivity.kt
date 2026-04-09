@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.text.InputType
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 
@@ -15,6 +16,7 @@ class SettingsActivity : AppCompatActivity() {
         var sendLocation: Boolean = true
         var useSMS: Boolean = true
         var useCall: Boolean = false
+        var impactValue: Double = 3.0 // 🔥 NOVO
     }
 
     val PICK_CONTACT = 1
@@ -30,6 +32,7 @@ class SettingsActivity : AppCompatActivity() {
         useSMS = prefs.getBoolean("sms", true)
         useCall = prefs.getBoolean("call", false)
         sendLocation = prefs.getBoolean("location", true)
+        impactValue = prefs.getFloat("impact", 3.0f).toDouble() // 🔥 NOVO
 
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
@@ -92,6 +95,31 @@ class SettingsActivity : AppCompatActivity() {
         layout.addView(callSwitch)
         layout.addView(locationSwitch)
 
+        // 🔥 NOVO — VALOR DE IMPACTO
+        val impactLabel = TextView(this)
+        impactLabel.text = "Valor de impacto (G)="
+
+        val impactInput = EditText(this)
+        impactInput.hint = "Ex: 3.0"
+        impactInput.inputType =
+            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+
+        impactInput.setText(impactValue.toString())
+
+        // guardar quando perde foco
+        impactInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val value = impactInput.text.toString().toDoubleOrNull()
+                if (value != null) {
+                    impactValue = value
+                    prefs.edit().putFloat("impact", value.toFloat()).apply()
+                }
+            }
+        }
+
+        layout.addView(impactLabel)
+        layout.addView(impactInput)
+
         setContentView(layout)
     }
 
@@ -100,13 +128,16 @@ class SettingsActivity : AppCompatActivity() {
 
         if (requestCode == PICK_CONTACT && resultCode == Activity.RESULT_OK) {
             val uri = data?.data ?: return
+
             val cursor = contentResolver.query(uri, null, null, null, null)
 
             cursor?.use {
                 if (it.moveToFirst()) {
+
                     val nameIndex = it.getColumnIndex(
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
                     )
+
                     val numberIndex = it.getColumnIndex(
                         ContactsContract.CommonDataKinds.Phone.NUMBER
                     )
@@ -125,4 +156,3 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
     }
-}
