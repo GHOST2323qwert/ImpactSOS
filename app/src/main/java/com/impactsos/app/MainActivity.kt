@@ -1,6 +1,7 @@
 package com.sosimpact
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.hardware.*
 import android.os.Bundle
@@ -23,7 +24,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var sosPending = false
     var isActive = false
 
-    var impactThreshold = 3.0 // 🔥 valor inicial
+    var impactThreshold = 2.5f // 🔴 VALOR DEFAULT (vai ser substituído pelas definições)
 
     var impactDetected = false
     var impactTime = 0L
@@ -60,7 +61,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         button.setOnClickListener {
 
-            // cancelar SOS pendente
+            // cancelar SOS
             if (sosPending) {
                 sosPending = false
                 button.text = "SOS OFF"
@@ -85,7 +86,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         layout.addView(button)
 
-        // MENU
+        // 📌 MENU
         val navView = NavigationView(this)
         val menu = navView.menu
         menu.add("Definições")
@@ -110,8 +111,26 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         setContentView(drawerLayout)
     }
 
+    // 🔴 IMPORTANTE: carregar valor das definições
+    override fun onResume() {
+        super.onResume()
+
+        val prefs = getSharedPreferences("SOS_PREFS", Context.MODE_PRIVATE)
+        impactThreshold = prefs.getFloat("impact", 2.5f)
+
+        accelerometer?.also {
+            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        sensorManager.unregisterListener(this)
+    }
+
     // 🚨 FUNÇÃO SOS
     private fun sendSOS() {
+
         val number = SettingsActivity.selectedNumber
 
         if (number == null) {
@@ -148,22 +167,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        // 🔥 LIGAÇÃO AO VALOR DAS DEFINIÇÕES (ISTO ERA O QUE FALTAVA)
-        impactThreshold = SettingsActivity.impactValue
-
-        accelerometer?.also {
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
-        }
-    }
-
-    override fun onPause() {
-        super.onPause()
-        sensorManager.unregisterListener(this)
-    }
-
     override fun onSensorChanged(event: SensorEvent) {
 
         if (!isActive) return
@@ -173,6 +176,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         val z = event.values[2]
 
         val gForce = sqrt((x * x + y * y + z * z)) / SensorManager.GRAVITY_EARTH
+
         val currentTime = System.currentTimeMillis()
 
         if (gForce > impactThreshold && !impactDetected) {
@@ -182,6 +186,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         if (impactDetected) {
             if (currentTime - impactTime > 3000) {
+
                 if (gForce < 1.2) {
 
                     Toast.makeText(this, "🚨 Acidente detetado! 5s para cancelar", Toast.LENGTH_LONG).show()
@@ -199,6 +204,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                         }
                     }, 5000)
                 }
+
                 impactDetected = false
             }
         }
