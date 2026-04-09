@@ -25,10 +25,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 🔐 pedir permissão SMS
+        // 🔐 permissões
         ActivityCompat.requestPermissions(
             this,
-            arrayOf(Manifest.permission.SEND_SMS),
+            arrayOf(Manifest.permission.SEND_SMS, Manifest.permission.CALL_PHONE),
             1
         )
 
@@ -37,7 +37,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         val drawerLayout = DrawerLayout(this)
 
-        // 🔴 UI PRINCIPAL
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
         layout.gravity = Gravity.BOTTOM
@@ -49,7 +48,6 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         button.text = "SOS OFF"
         button.setBackgroundColor(android.graphics.Color.RED)
         button.setTextColor(android.graphics.Color.WHITE)
-        button.setPadding(100, 100, 100, 100)
 
         val params = LinearLayout.LayoutParams(300, 300)
         params.gravity = Gravity.CENTER_HORIZONTAL
@@ -61,44 +59,23 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
             if (isActive) {
                 button.text = "SOS ON"
                 button.setBackgroundColor(android.graphics.Color.GREEN)
-
-                val number = SettingsActivity.selectedNumber
-
-                if (number != null) {
-                    try {
-                        val smsManager = SmsManager.getDefault()
-                        smsManager.sendTextMessage(
-                            number,
-                            null,
-                            "🚨 SOS! Preciso de ajuda!",
-                            null,
-                            null
-                        )
-                        Toast.makeText(this, "SMS enviado!", Toast.LENGTH_SHORT).show()
-                    } catch (e: Exception) {
-                        Toast.makeText(this, "Erro ao enviar SMS", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Toast.makeText(this, "Escolhe um contacto primeiro!", Toast.LENGTH_SHORT).show()
-                }
-
+                sendSOS()
             } else {
                 button.text = "SOS OFF"
                 button.setBackgroundColor(android.graphics.Color.RED)
-                Toast.makeText(this, "SOS DESATIVADO", Toast.LENGTH_SHORT).show()
             }
         }
 
         layout.addView(button)
 
-        // 📌 MENU
+        // MENU
         val navView = NavigationView(this)
         val menu = navView.menu
         menu.add("Definições")
 
         navView.setNavigationItemSelectedListener {
-            when (it.title) {
-                "Definições" -> startActivity(Intent(this, SettingsActivity::class.java))
+            if (it.title == "Definições") {
+                startActivity(Intent(this, SettingsActivity::class.java))
             }
             drawerLayout.closeDrawer(Gravity.RIGHT)
             true
@@ -114,6 +91,43 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         drawerLayout.addView(navView, navParams)
 
         setContentView(drawerLayout)
+    }
+
+    private fun sendSOS() {
+        val number = SettingsActivity.selectedNumber
+
+        if (number == null) {
+            Toast.makeText(this, "Escolhe um contacto primeiro!", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        // 📩 SMS
+        if (SettingsActivity.useSMS) {
+            try {
+                val smsManager = SmsManager.getDefault()
+                smsManager.sendTextMessage(
+                    number,
+                    null,
+                    "🚨 SOS! Preciso de ajuda!",
+                    null,
+                    null
+                )
+                Toast.makeText(this, "SMS enviado!", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this, "Erro SMS", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // 📞 CHAMADA
+        if (SettingsActivity.useCall) {
+            try {
+                val intent = Intent(Intent.ACTION_CALL)
+                intent.data = android.net.Uri.parse("tel:$number")
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(this, "Erro chamada", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onResume() {
@@ -144,7 +158,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         if (impactDetected) {
             if (currentTime - impactTime > 3000) {
                 if (gForce < 1.2) {
-                    Toast.makeText(this, "🚨 POSSÍVEL ACIDENTE DETETADO!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "🚨 POSSÍVEL ACIDENTE!", Toast.LENGTH_LONG).show()
+                    sendSOS()
                 }
                 impactDetected = false
             }
