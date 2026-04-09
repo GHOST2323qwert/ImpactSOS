@@ -15,7 +15,7 @@ class SettingsActivity : AppCompatActivity() {
         var sendLocation: Boolean = true
         var useSMS: Boolean = true
         var useCall: Boolean = false
-        var impactValue: Float = 2.5f // 👈 valor default
+        var impactValue: Float = 2.5f
     }
 
     val PICK_CONTACT = 1
@@ -26,7 +26,7 @@ class SettingsActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences("SOS_PREFS", Context.MODE_PRIVATE)
 
-        // 🔁 carregar dados
+        // carregar dados
         selectedNumber = prefs.getString("number", null)
         useSMS = prefs.getBoolean("sms", true)
         useCall = prefs.getBoolean("call", false)
@@ -37,7 +37,7 @@ class SettingsActivity : AppCompatActivity() {
         layout.orientation = LinearLayout.VERTICAL
         layout.setPadding(50, 50, 50, 50)
 
-        // 🔙 BOTÃO VOLTAR
+        // 🔙 voltar
         val backButton = Button(this)
         backButton.text = "← Voltar"
         backButton.setOnClickListener { finish() }
@@ -66,7 +66,6 @@ class SettingsActivity : AppCompatActivity() {
         title.text = "⚙️ Sistema SOS"
         layout.addView(title)
 
-        // 📩 SMS
         val smsSwitch = Switch(this)
         smsSwitch.text = "Enviar SMS"
         smsSwitch.isChecked = useSMS
@@ -75,7 +74,6 @@ class SettingsActivity : AppCompatActivity() {
             prefs.edit().putBoolean("sms", isChecked).apply()
         }
 
-        // 📞 CHAMADA
         val callSwitch = Switch(this)
         callSwitch.text = "Chamada automática"
         callSwitch.isChecked = useCall
@@ -84,7 +82,6 @@ class SettingsActivity : AppCompatActivity() {
             prefs.edit().putBoolean("call", isChecked).apply()
         }
 
-        // 📍 LOCALIZAÇÃO
         val locationSwitch = Switch(this)
         locationSwitch.text = "Enviar Localização"
         locationSwitch.isChecked = sendLocation
@@ -97,31 +94,22 @@ class SettingsActivity : AppCompatActivity() {
         layout.addView(callSwitch)
         layout.addView(locationSwitch)
 
-        // ⚡ IMPACTO
-        val impactLabel = TextView(this)
-        impactLabel.text = "Valor de impacto (G)"
-
+        // ⚡ IMPACTO (AQUI ESTÁ O QUE PEDISTE)
         val impactInput = EditText(this)
-        impactInput.setText(impactValue.toString())
-        impactInput.hint = "Ex: 2.5"
+        impactInput.hint = "Valor de impacto (G)"
+        impactInput.setText(prefs.getFloat("impact", 2.5f).toString())
 
-        val saveImpactButton = Button(this)
-        saveImpactButton.text = "Guardar valor"
-
-        saveImpactButton.setOnClickListener {
-            val value = impactInput.text.toString().toFloatOrNull()
-            if (value != null) {
-                impactValue = value
-                prefs.edit().putFloat("impact", value).apply()
-                Toast.makeText(this, "Valor guardado!", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, "Valor inválido", Toast.LENGTH_SHORT).show()
+        impactInput.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val value = impactInput.text.toString().toFloatOrNull()
+                if (value != null) {
+                    impactValue = value
+                    prefs.edit().putFloat("impact", value).apply()
+                }
             }
         }
 
-        layout.addView(impactLabel)
         layout.addView(impactInput)
-        layout.addView(saveImpactButton)
 
         setContentView(layout)
     }
@@ -131,13 +119,16 @@ class SettingsActivity : AppCompatActivity() {
 
         if (requestCode == PICK_CONTACT && resultCode == Activity.RESULT_OK) {
             val uri = data?.data ?: return
+
             val cursor = contentResolver.query(uri, null, null, null, null)
 
             cursor?.use {
                 if (it.moveToFirst()) {
+
                     val nameIndex = it.getColumnIndex(
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
                     )
+
                     val numberIndex = it.getColumnIndex(
                         ContactsContract.CommonDataKinds.Phone.NUMBER
                     )
@@ -147,7 +138,6 @@ class SettingsActivity : AppCompatActivity() {
 
                     selectedNumber = number
 
-                    val prefs = getSharedPreferences("SOS_PREFS", Context.MODE_PRIVATE)
                     prefs.edit().putString("number", number).apply()
 
                     contactText.text = "Selecionado:\n$name\n$number"
