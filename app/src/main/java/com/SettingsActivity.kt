@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.ContactsContract
-import android.text.InputType
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 
@@ -16,7 +15,7 @@ class SettingsActivity : AppCompatActivity() {
         var sendLocation: Boolean = true
         var useSMS: Boolean = true
         var useCall: Boolean = false
-        var impactValue: Double = 3.0
+        var impactValue: Float = 2.5f // 👈 valor default
     }
 
     val PICK_CONTACT = 1
@@ -27,24 +26,24 @@ class SettingsActivity : AppCompatActivity() {
 
         val prefs = getSharedPreferences("SOS_PREFS", Context.MODE_PRIVATE)
 
-        // carregar dados
+        // 🔁 carregar dados
         selectedNumber = prefs.getString("number", null)
         useSMS = prefs.getBoolean("sms", true)
         useCall = prefs.getBoolean("call", false)
         sendLocation = prefs.getBoolean("location", true)
-        impactValue = prefs.getFloat("impact", 3.0f).toDouble()
+        impactValue = prefs.getFloat("impact", 2.5f)
 
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
         layout.setPadding(50, 50, 50, 50)
 
-        // botão voltar
+        // 🔙 BOTÃO VOLTAR
         val backButton = Button(this)
         backButton.text = "← Voltar"
         backButton.setOnClickListener { finish() }
         layout.addView(backButton)
 
-        // CONTACTO
+        // 📞 CONTACTO
         val contactButton = Button(this)
         contactButton.text = "Escolher Contacto"
 
@@ -62,7 +61,12 @@ class SettingsActivity : AppCompatActivity() {
         layout.addView(contactButton)
         layout.addView(contactText)
 
-        // SISTEMA SOS
+        // ⚙️ SISTEMA SOS
+        val title = TextView(this)
+        title.text = "⚙️ Sistema SOS"
+        layout.addView(title)
+
+        // 📩 SMS
         val smsSwitch = Switch(this)
         smsSwitch.text = "Enviar SMS"
         smsSwitch.isChecked = useSMS
@@ -71,14 +75,16 @@ class SettingsActivity : AppCompatActivity() {
             prefs.edit().putBoolean("sms", isChecked).apply()
         }
 
+        // 📞 CHAMADA
         val callSwitch = Switch(this)
-        callSwitch.text = "Fazer chamada automática"
+        callSwitch.text = "Chamada automática"
         callSwitch.isChecked = useCall
         callSwitch.setOnCheckedChangeListener { _, isChecked ->
             useCall = isChecked
             prefs.edit().putBoolean("call", isChecked).apply()
         }
 
+        // 📍 LOCALIZAÇÃO
         val locationSwitch = Switch(this)
         locationSwitch.text = "Enviar Localização"
         locationSwitch.isChecked = sendLocation
@@ -91,29 +97,31 @@ class SettingsActivity : AppCompatActivity() {
         layout.addView(callSwitch)
         layout.addView(locationSwitch)
 
-        // 🔥 IMPACTO
+        // ⚡ IMPACTO
         val impactLabel = TextView(this)
-        impactLabel.text = "Valor de impacto (G)="
+        impactLabel.text = "Valor de impacto (G)"
 
         val impactInput = EditText(this)
-        impactInput.hint = "Ex: 3.0"
-        impactInput.inputType =
-            InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
-
         impactInput.setText(impactValue.toString())
+        impactInput.hint = "Ex: 2.5"
 
-        impactInput.setOnFocusChangeListener { _, hasFocus ->
-            if (!hasFocus) {
-                val value = impactInput.text.toString().toDoubleOrNull()
-                if (value != null) {
-                    impactValue = value
-                    prefs.edit().putFloat("impact", value.toFloat()).apply()
-                }
+        val saveImpactButton = Button(this)
+        saveImpactButton.text = "Guardar valor"
+
+        saveImpactButton.setOnClickListener {
+            val value = impactInput.text.toString().toFloatOrNull()
+            if (value != null) {
+                impactValue = value
+                prefs.edit().putFloat("impact", value).apply()
+                Toast.makeText(this, "Valor guardado!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Valor inválido", Toast.LENGTH_SHORT).show()
             }
         }
 
         layout.addView(impactLabel)
         layout.addView(impactInput)
+        layout.addView(saveImpactButton)
 
         setContentView(layout)
     }
@@ -123,16 +131,13 @@ class SettingsActivity : AppCompatActivity() {
 
         if (requestCode == PICK_CONTACT && resultCode == Activity.RESULT_OK) {
             val uri = data?.data ?: return
-
             val cursor = contentResolver.query(uri, null, null, null, null)
 
             cursor?.use {
                 if (it.moveToFirst()) {
-
                     val nameIndex = it.getColumnIndex(
                         ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME
                     )
-
                     val numberIndex = it.getColumnIndex(
                         ContactsContract.CommonDataKinds.Phone.NUMBER
                     )
