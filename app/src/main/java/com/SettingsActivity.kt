@@ -1,6 +1,7 @@
 package com.sosimpact
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.provider.ContactsContract
@@ -22,6 +23,14 @@ class SettingsActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val prefs = getSharedPreferences("SOS_PREFS", Context.MODE_PRIVATE)
+
+        // 🔁 carregar dados guardados
+        selectedNumber = prefs.getString("number", null)
+        useSMS = prefs.getBoolean("sms", true)
+        useCall = prefs.getBoolean("call", false)
+        sendLocation = prefs.getBoolean("location", true)
+
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
         layout.setPadding(50, 50, 50, 50)
@@ -37,7 +46,7 @@ class SettingsActivity : AppCompatActivity() {
         contactButton.text = "Escolher Contacto"
 
         contactText = TextView(this)
-        contactText.text = "Nenhum contacto selecionado"
+        contactText.text = selectedNumber ?: "Nenhum contacto selecionado"
 
         contactButton.setOnClickListener {
             val intent = Intent(
@@ -57,23 +66,26 @@ class SettingsActivity : AppCompatActivity() {
 
         val smsSwitch = Switch(this)
         smsSwitch.text = "Enviar SMS"
-        smsSwitch.isChecked = true
+        smsSwitch.isChecked = useSMS
         smsSwitch.setOnCheckedChangeListener { _, isChecked ->
             useSMS = isChecked
+            prefs.edit().putBoolean("sms", isChecked).apply()
         }
 
         val callSwitch = Switch(this)
         callSwitch.text = "Fazer chamada automática"
-        callSwitch.isChecked = false
+        callSwitch.isChecked = useCall
         callSwitch.setOnCheckedChangeListener { _, isChecked ->
             useCall = isChecked
+            prefs.edit().putBoolean("call", isChecked).apply()
         }
 
         val locationSwitch = Switch(this)
         locationSwitch.text = "Enviar Localização"
-        locationSwitch.isChecked = true
+        locationSwitch.isChecked = sendLocation
         locationSwitch.setOnCheckedChangeListener { _, isChecked ->
             sendLocation = isChecked
+            prefs.edit().putBoolean("location", isChecked).apply()
         }
 
         layout.addView(smsSwitch)
@@ -103,6 +115,11 @@ class SettingsActivity : AppCompatActivity() {
                     val number = it.getString(numberIndex)
 
                     selectedNumber = number
+
+                    // 💾 guardar
+                    val prefs = getSharedPreferences("SOS_PREFS", Context.MODE_PRIVATE)
+                    prefs.edit().putString("number", number).apply()
+
                     contactText.text = "Selecionado:\n$name\n$number"
                 }
             }
