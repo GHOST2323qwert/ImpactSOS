@@ -23,7 +23,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     var sosPending = false
     var isActive = false
 
-    var impactThreshold = 1.0
+    var impactThreshold = 3.0 // valor inicial
+
     var impactDetected = false
     var impactTime = 0L
 
@@ -47,9 +48,8 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
         layout.gravity = Gravity.BOTTOM
         layout.setPadding(50, 50, 50, 50)
 
-        // 🔴 BOTÃO (AGORA GLOBAL)
+        // 🔴 BOTÃO
         button = Button(this)
-
         button.text = "SOS OFF"
         button.setBackgroundColor(android.graphics.Color.RED)
         button.setTextColor(android.graphics.Color.WHITE)
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
         button.setOnClickListener {
 
-            // 🔴 SE HOUVER SOS PENDENTE → CANCELA
+            // cancelar SOS pendente
             if (sosPending) {
                 sosPending = false
                 button.text = "SOS OFF"
@@ -150,6 +150,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
+
+        // 🔥 atualizar valor vindo das definições
+        impactThreshold = SettingsActivity.impactValue
+
         accelerometer?.also {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_NORMAL)
         }
@@ -162,7 +166,7 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
 
-        if (!isActive) return // 🔴 só funciona se sistema ligado
+        if (!isActive) return
 
         val x = event.values[0]
         val y = event.values[1]
@@ -186,12 +190,10 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                     button.text = "CANCELAR SOS"
                     button.setBackgroundColor(android.graphics.Color.YELLOW)
 
-                    // ⏳ ESPERA 5 SEGUNDOS
                     button.postDelayed({
                         if (sosPending) {
                             sendSOS()
                             sosPending = false
-
                             button.text = "SOS OFF"
                             button.setBackgroundColor(android.graphics.Color.RED)
                         }
